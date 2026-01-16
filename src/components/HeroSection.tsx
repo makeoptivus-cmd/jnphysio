@@ -93,7 +93,7 @@ const HeroSection = () => {
                 <div className="w-28 h-28 md:w-32 md:h-32 rounded-full gradient-hero p-1">
                   <div className="w-full h-full rounded-full overflow-hidden bg-secondary">
                     <img
-                      src="/logo.png"
+                      src="/jnp.jpg"
                       alt="JN Physiotherapy Logo"
                       className="w-full h-full object-cover"
                     />

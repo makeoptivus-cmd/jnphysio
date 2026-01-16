@@ -12,16 +12,16 @@ const Footer = () => {
           {/* Clinic Info & Social */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-             <div className="flex items-center gap-3 min-w-0">
-  {/* Logo */}
-          <div className="w-11 h-11 md:w-14 md:h-14 rounded-full gradient-hero flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
-            <img
-              src="/logo.png"
-              alt="JN Physiotherapy Logo"
-              className="w-full h-full object-cover rounded-full"
-            />
-          </div>
-        </div>
+              <div className="flex items-center gap-3 min-w-0">
+                {/* Logo */}
+                <div className="w-11 h-11 md:w-14 md:h-14 rounded-full gradient-hero flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
+                  <img
+                    src="/logo2.png"
+                    alt="JN Physiotherapy Logo"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+              </div>
 
               <div>
                 <h3 className="font-display font-semibold text-sm">JN Physiotherapy</h3>
@@ -31,7 +31,7 @@ const Footer = () => {
             <p className="text-primary-foreground/80 text-xs leading-relaxed max-w-xs">
               Dedicated to restoring your mobility and improving your quality of life through expert physiotherapy care.
             </p>
-            
+
             {/* Instagram Link */}
             <a
               href="https://www.instagram.com/jn_physioclinic?igsh=c3hyMnU4eGpwdXc3"

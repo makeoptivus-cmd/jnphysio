@@ -34,7 +34,7 @@ const Header = () => {
   {/* Logo */}
   <div className="w-11 h-11 md:w-14 md:h-14 rounded-full gradient-hero flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden">
     <img
-      src="/logo.png"
+      src="/logo2.png"
       alt="JN Physiotherapy Logo"
       className="w-full h-full object-cover rounded-full"
     />
