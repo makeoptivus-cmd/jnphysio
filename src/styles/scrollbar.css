@@ -1,0 +1,29 @@
+/* Scrollbar styling */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ScrollStack item animation */
+.scroll-stack-item {
+    animation-delay: inherit;
+}
+
+/* Services section scrollbar */
+#services .flex.overflow-x-auto::-webkit-scrollbar {
+    display: none;
+}
+
+#services .flex.overflow-x-auto {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}

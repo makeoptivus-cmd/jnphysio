@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 33%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 33%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 33%;
+
+    /* Royal Blue #1F5AA6 */
+    --primary: 213 69% 39%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light blue tint for secondary */
+    --secondary: 213 30% 96%;
+    --secondary-foreground: 0 0% 33%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    /* Golden Yellow #C9A227 */
+    --accent: 45 70% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Dark Brown #7A3E12 */
+    --brown: 25 74% 27%;
+    --brown-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 213 69% 39%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(213 69% 39%) 0%, hsl(213 69% 50%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45 70% 47%) 0%, hsl(45 70% 55%) 100%);
+    --shadow-soft: 0 4px 20px -2px hsl(0 0% 33% / 0.08);
+    --shadow-card: 0 8px 30px -4px hsl(0 0% 33% / 0.1);
+    --shadow-elevated: 0 20px 50px -10px hsl(0 0% 33% / 0.15);
+  }
+}
+
+@layer utilities {
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-gold {
+    background: var(--gradient-gold);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  
+  .text-gradient {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
