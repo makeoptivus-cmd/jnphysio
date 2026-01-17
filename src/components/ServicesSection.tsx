@@ -125,11 +125,11 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        {/* Mobile: Horizontal Scroll */}
-        <div className="md:hidden">
+        {/* Horizontal Scroll - Both Mobile and Desktop */}
+        <div>
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4"
+            className="flex gap-4 md:gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -139,12 +139,12 @@ const ServicesSection = () => {
             {services.map((service, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[280px] snap-start"
+                className="flex-shrink-0 w-[280px] md:w-[360px] lg:w-[400px] snap-start"
               >
-                <div className="bg-white rounded-2xl shadow-md overflow-hidden h-full hover:shadow-xl transition-shadow duration-300">
+                <div className="bg-white rounded-2xl shadow-md overflow-hidden h-full hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
                   
                   {/* Image */}
-                  <div className={`h-48 bg-gradient-to-br ${service.color} relative overflow-hidden`}>
+                  <div className={`h-48 md:h-56 lg:h-64 bg-gradient-to-br ${service.color} relative overflow-hidden`}>
                     <img
                       src={service.image}
                       alt={service.title}
@@ -157,11 +157,11 @@ const ServicesSection = () => {
                   </div>
 
                   {/* Content */}
-                  <div className="p-5">
-                    <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2">
+                  <div className="p-5 md:p-6 lg:p-7">
+                    <h3 className="font-bold text-lg md:text-xl lg:text-2xl text-gray-900 mb-2 md:mb-3 line-clamp-2">
                       {service.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                    <p className="text-gray-600 text-sm md:text-base leading-relaxed line-clamp-3">
                       {service.description}
                     </p>
                   </div>
@@ -171,49 +171,15 @@ const ServicesSection = () => {
           </div>
 
           {/* Swipe Hint */}
-          <div className="flex justify-center mt-4">
-            <span className="text-xs text-gray-500">
-              ← Swipe to see more →
+          <div className="flex justify-center mt-4 md:mt-6">
+            <span className="text-xs md:text-sm text-gray-500">
+              ← Scroll to see more →
             </span>
           </div>
         </div>
 
-        {/* Desktop: Grid Layout */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {services.map((service, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
-            >
-              
-              {/* Image */}
-              <div className={`h-56 lg:h-64 bg-gradient-to-br ${service.color} relative overflow-hidden`}>
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/5" />
-              </div>
-
-              {/* Content */}
-              <div className="p-6 lg:p-7">
-                <h3 className="font-bold text-xl lg:text-2xl text-gray-900 mb-3">
-                  {service.title}
-                </h3>
-                <p className="text-gray-600 text-sm lg:text-base leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* CTA Button */}
-     
+
       </div>
 
       <style jsx>{`
