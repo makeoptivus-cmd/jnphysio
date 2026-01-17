@@ -17,53 +17,57 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface Review {
-  id: string;
+  id?: string;
   name: string;
-  rating: number;
+  rating: number | null;
   comment: string;
   date: string;
 }
 
-const defaultReviews: Review[] = [];
-
 const ReviewsSection = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
   const [name, setName] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
+
+  // Google review flow
+  const [showGooglePrompt, setShowGooglePrompt] = useState(false);
+  const [lastReviewText, setLastReviewText] = useState("");
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /* ---------------- FETCH REVIEWS ---------------- */
   useEffect(() => {
     const loadReviews = async () => {
       const { data, error } = await fetchReviews();
 
       if (error) {
-        console.error("Failed to fetch reviews:", error);
-        toast.error(`Failed to fetch reviews: ${error}`);
-        setReviews(defaultReviews);
-      } else if (data && data.length > 0) {
-        console.log("Fetched reviews:", data);
-        // Sort reviews by date descending (latest first)
-        const sorted = [...data].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        toast.error("Failed to fetch reviews");
+        return;
+      }
+
+      if (data) {
+        const sorted = [...data].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
         setReviews(sorted);
-      } else {
-        console.log("No data returned from Supabase");
-        setReviews(defaultReviews);
       }
     };
     loadReviews();
   }, []);
 
+  /* ---------------- SUBMIT REVIEW ---------------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !comment.trim()) {
-      toast.error("Please fill in all fields");
+    if (!name.trim() || !comment.trim() || !rating) {
+      toast.error("Please fill all fields");
       return;
     }
 
-    const newReview = {
+    const newReview: Review = {
       name: name.trim(),
       rating,
       comment: comment.trim(),
@@ -73,145 +77,152 @@ const ReviewsSection = () => {
     const result = await postReview(newReview);
 
     if (!result.success) {
-      toast.error(`Failed to submit review: ${result.error}`);
+      toast.error("Failed to submit review");
       return;
     }
 
-    // Add new review and sort by date descending
-    const updated = [newReview as any, ...reviews].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setReviews(updated);
+    setReviews((prev) => [newReview, ...prev]);
+
+    // save for google
+    setLastReviewText(comment.trim());
+
+    // reset
     setName("");
     setRating(null);
     setComment("");
     setIsOpen(false);
+
     toast.success("Thank you for your review!");
-  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = 300;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
+    // show google prompt only for good ratings
+    if (rating >= 4) {
+      setShowGooglePrompt(true);
     }
   };
 
-  // First 3 reviews for vertical display
+  /* ---------------- GOOGLE REVIEW HANDLER ---------------- */
+  const handleGoogleReview = async () => {
+    try {
+      await navigator.clipboard.writeText(lastReviewText);
+
+      window.open(
+        "https://www.google.com/maps/place/JN+PHYSIOTHERAPY+%26+REHABILITATION+CLINIC/@13.1185274,80.1554949,17z/data=!4m8!3m7!1s0x3a52630024b5dcbb:0x7343f63190bea8eb!8m2!3d13.1185274!4d80.1554949!9m1!1b1!16s%2Fg%2F11vpz93j5q!17m2!4m1!1e3!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDExMy4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D",
+        "_blank"
+      );
+
+      toast.success("Review copied! Paste it on Google (Ctrl + V)");
+      setShowGooglePrompt(false);
+    } catch {
+      toast.error("Clipboard permission denied");
+    }
+  };
+
+  /* ---------------- HELPERS ---------------- */
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({
+      left: dir === "left" ? -300 : 300,
+      behavior: "smooth",
+    });
+  };
+
   const featuredReviews = reviews.slice(0, 3);
-  // Remaining reviews for horizontal scroll
   const scrollableReviews = reviews.slice(3);
 
-  const ReviewCard = ({ review, index }: { review: Review; index: number }) => (
-    <Card
-      className="bg-card border-border/50 hover:shadow-card transition-shadow duration-300 flex-shrink-0 w-full md:w-auto"
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
+  const ReviewCard = ({ review }: { review: Review }) => (
+    <Card className="bg-card border-border/50 flex-shrink-0">
       <CardContent className="p-4 space-y-3">
         <Quote className="w-8 h-8 text-primary/20" />
-
-        <div className="flex gap-0.5">
-          {[1, 2, 3, 4, 5].map((star) => (
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((s) => (
             <Star
-              key={star}
-              className={`w-4 h-4 ${star <= review.rating
-                ? "fill-accent text-accent"
-                : "text-border"
-                }`}
+              key={s}
+              className={`w-4 h-4 ${
+                s <= (review.rating ?? 0)
+                  ? "fill-accent text-accent"
+                  : "text-border"
+              }`}
             />
           ))}
         </div>
-
-        <p className="text-foreground text-sm leading-relaxed line-clamp-3">{review.comment}</p>
-
-        <div className="pt-3 border-t border-border">
-          <p className="font-semibold text-foreground text-sm">{review.name}</p>
-          <p className="text-xs text-muted-foreground">{formatDate(review.date)}</p>
+        <p className="text-sm line-clamp-3">{review.comment}</p>
+        <div className="border-t pt-2">
+          <p className="font-semibold text-sm">{review.name}</p>
+          <p className="text-xs text-muted-foreground">
+            {formatDate(review.date)}
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 
+  /* ---------------- UI ---------------- */
   return (
-    <section id="reviews" className="py-12 md:py-16 bg-muted/50">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-col gap-4 mb-8">
-          <div className="space-y-2">
-            <span className="text-primary font-semibold text-xs uppercase tracking-wider">
-              Testimonials
-            </span>
-            <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-              Patients Testimonials
-            </h2>
-            <p className="text-muted-foreground text-sm max-w-xl">
-              Read genuine reviews from our patients and share your experience.
+    <section id="reviews" className="py-12 bg-muted/50">
+      <div className="container mx-auto px-4 space-y-6">
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Patient Testimonials</h2>
+            <p className="text-sm text-muted-foreground">
+              Share your experience with us
             </p>
           </div>
 
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="gap-1.5 w-fit">
-                <Plus className="w-4 h-4" />
-                Write a Review
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-1" /> Write Review
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md mx-4">
+
+            <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-display text-xl">Share Your Experience</DialogTitle>
-                <DialogDescription className="text-sm">
-                  Your feedback helps us improve and helps others make informed decisions.
+                <DialogTitle>Share Your Experience</DialogTitle>
+                <DialogDescription>
+                  Your feedback helps others.
                 </DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 mt-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-sm">Your Name</Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="bg-background"
-                  />
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label>Your Name</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-sm">Rating</Label>
-                  <div className="flex gap-1.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                <div>
+                  <Label>Rating</Label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
                       <button
-                        key={star}
+                        key={s}
                         type="button"
-                        onClick={() => setRating(star)}
-                        className="focus:outline-none transition-transform hover:scale-110"
-                        title={`Rate ${star} stars`}
+                        onClick={() => setRating(s)}
                       >
                         <Star
-                          className={`w-7 h-7 ${star <= rating
-                            ? "fill-accent text-accent"
-                            : "text-border"
-                            }`}
+                          className={`w-7 h-7 ${
+                            s <= (rating ?? 0)
+                              ? "fill-accent text-accent"
+                              : "text-border"
+                          }`}
                         />
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="comment" className="text-sm">Your Review</Label>
+                <div>
+                  <Label>Review</Label>
                   <Textarea
-                    id="comment"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Tell us about your experience..."
-                    className="min-h-[100px] bg-background resize-none"
                   />
                 </div>
 
@@ -223,51 +234,67 @@ const ReviewsSection = () => {
           </Dialog>
         </div>
 
-        {/* Featured Reviews - Vertical Stack (First 3) */}
-        <div className="flex flex-col gap-4 mb-6">
-          {featuredReviews.map((review, index) => (
-            <ReviewCard key={review.id} review={review} index={index} />
+        {/* REVIEWS */}
+        <div className="space-y-4">
+          {featuredReviews.map((r, i) => (
+            <ReviewCard key={i} review={r} />
           ))}
         </div>
 
-        {/* Scrollable Reviews */}
         {scrollableReviews.length > 0 && (
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-muted-foreground">More Reviews</p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => scroll("left")}
-                  title="Scroll left"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => scroll("right")}
-                  title="Scroll right"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
+          <div>
+            <div className="flex justify-end gap-2 mb-2">
+              <Button size="icon" variant="outline" onClick={() => scroll("left")}>
+                <ChevronLeft />
+              </Button>
+              <Button size="icon" variant="outline" onClick={() => scroll("right")}>
+                <ChevronRight />
+              </Button>
             </div>
+
             <div
               ref={scrollRef}
-              className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+              className="flex gap-4 overflow-x-auto pb-2"
             >
-              {scrollableReviews.map((review, index) => (
-                <div key={review.id} className="snap-start min-w-[280px] max-w-[300px]">
-                  <ReviewCard review={review} index={index + 3} />
+              {scrollableReviews.map((r, i) => (
+                <div key={i} className="min-w-[280px]">
+                  <ReviewCard review={r} />
                 </div>
               ))}
             </div>
           </div>
         )}
+
+        {/* GOOGLE REVIEW POPUP */}
+        <Dialog open={showGooglePrompt} onOpenChange={setShowGooglePrompt}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Support us on Google ⭐</DialogTitle>
+              <DialogDescription>
+                Your review is copied. Paste it on Google.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3">
+              <div className="border p-3 rounded bg-muted text-sm">
+                {lastReviewText}
+              </div>
+
+              <Button onClick={handleGoogleReview} className="w-full">
+                Copy & Post on Google
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => setShowGooglePrompt(false)}
+              >
+                Skip for now
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </section>
   );
