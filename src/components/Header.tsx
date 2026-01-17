@@ -8,6 +8,19 @@ const Header = () => {
 
   return (
     <>
+      {/* 🔽 Floating Call Button (BOTTOM) */}
+      <div className="fixed bottom-4 right-4 z-[60]">
+        <a href="tel:+918525860099">
+          <Button
+            size="lg"
+            className="gap-2 rounded-full shadow-lg"
+          >
+            <Phone className="w-5 h-5" />
+            Call
+          </Button>
+        </a>
+      </div>
+
       <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
 
@@ -39,22 +52,15 @@ const Header = () => {
             <button onClick={() => scrollToSection("reviews")}>Reviews</button>
           </nav>
 
-          {/* RIGHT: Call + Book Appointment */}
+          {/* RIGHT: Book Appointment */}
           <div className="flex items-center gap-2">
-            <a href="tel:+918525860099">
-              <Button size="sm" variant="outline" className="gap-1">
-                <Phone className="w-4 h-4" />
-                Call
-              </Button>
-            </a>
-
             <Button
               size="sm"
               className="gap-1"
               onClick={() => scrollToSection("appointment")}
             >
               <Calendar className="w-4 h-4" />
-              Book
+              Book appointment
             </Button>
           </div>
         </div>
