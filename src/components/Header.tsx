@@ -60,7 +60,7 @@ const Header = () => {
               onClick={() => scrollToSection("appointment")}
             >
               <Calendar className="w-4 h-4" />
-              Book appointment
+              appointment
             </Button>
           </div>
         </div>
