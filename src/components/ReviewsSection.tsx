@@ -106,7 +106,7 @@ const ReviewsSection = () => {
       await navigator.clipboard.writeText(lastReviewText);
 
       window.open(
-        "https://www.google.com/maps/place/JN+PHYSIOTHERAPY+%26+REHABILITATION+CLINIC/@13.1185274,80.1554949,17z/data=!4m8!3m7!1s0x3a52630024b5dcbb:0x7343f63190bea8eb!8m2!3d13.1185274!4d80.1554949!9m1!1b1!16s%2Fg%2F11vpz93j5q!17m2!4m1!1e3!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDExMy4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D",
+        "https://g.page/r/CeuovpAx9kNzEBM/review",
         "_blank"
       );
 
