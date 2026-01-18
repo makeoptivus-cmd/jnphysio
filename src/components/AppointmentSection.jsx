@@ -3,14 +3,27 @@ import { supabase } from "../lib/supabaseClient";
 
 /* ---------- Helpers ---------- */
 
-// Today
-const today = new Date();
-const todayISO = today.toISOString().split("T")[0];
-const todayReadable = today.toLocaleDateString("en-IN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
+// Get available dates (today + next 2 days)
+const getAvailableDates = () => {
+  const dates = [];
+  for (let i = 0; i < 3; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    dates.push({
+      iso: date.toISOString().split("T")[0],
+      readable: date.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }),
+      dayName: date.toLocaleDateString("en-IN", { weekday: "long" })
+    });
+  }
+  return dates;
+};
+
+const availableDates = getAvailableDates();
+const todayISO = availableDates[0].iso;
 
 // Time slots: 8 AM – 10 PM (15 mins)
 const generateTimeSlots = () => {
@@ -104,47 +117,72 @@ const AppointmentSection = () => {
   };
 
   return (
-    <section id="appointment" className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 md:py-16 lg:py-20">
+    <section id="appointment" className="w-full bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 md:py-12">
       {/* RESPONSIVE CONTAINER */}
       <div className="w-full px-4 sm:px-6 md:px-8 max-w-md md:max-w-2xl mx-auto">
 
         {/* Title */}
-        <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 md:mb-3">
+        <div className="text-center mb-6 md:mb-8">
+          <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
             Book Your Appointment
           </h2>
-          <p className="text-sm md:text-base lg:text-lg text-gray-600">
+          <p className="text-sm md:text-base text-gray-600">
             Quick and easy – takes less than a minute
           </p>
         </div>
 
         {/* Success Message */}
         {success ? (
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 p-6 md:p-10 rounded-2xl shadow-xl text-center animate-fade-in">
-            <div className="w-16 h-16 md:w-20 md:h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
-              <svg className="w-8 h-8 md:w-10 md:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white border-2 border-green-500 p-8 md:p-12 rounded-3xl shadow-2xl text-center">
+            {/* Success Icon */}
+            <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-xl">
+              <svg className="w-10 h-10 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-green-800 mb-3">
-              Appointment Request Received!
+            
+            {/* Success Message */}
+            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              Thank You!
             </h3>
-            <p className="text-sm md:text-base text-gray-700 mb-6 md:mb-8">
-              Our team will contact you shortly to confirm your appointment.
+            <p className="text-base md:text-lg text-gray-600 max-w-md mx-auto">
+              Your appointment request has been received. Our team will contact you shortly to confirm.
             </p>
-            <button
-              onClick={() => setSuccess(false)}
-              className="px-6 md:px-8 py-3 md:py-3.5 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Book Another Appointment
-            </button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl p-6 md:p-10 lg:p-12">
-            {/* Date Display */}
-            <div className="text-center bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl md:rounded-2xl py-4 md:py-5 mb-6 md:mb-8 shadow-sm">
-              <p className="text-xs md:text-sm text-gray-600 mb-1">Appointment Date</p>
-              <p className="text-lg md:text-2xl font-bold text-gray-900">{todayReadable}</p>
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl p-6 md:p-10">
+            {/* Date Selection */}
+            <div className="mb-6 md:mb-8">
+              <label className="block text-sm md:text-base font-semibold text-gray-700 mb-3">
+                Select Appointment Date <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-2 md:gap-3">
+                {availableDates.map((date, index) => (
+                  <button
+                    key={date.iso}
+                    type="button"
+                    onClick={() => setForm({ ...form, preferred_date: date.iso })}
+                    className={`flex-1 p-3 md:p-4 rounded-xl border-2 transition-all ${
+                      form.preferred_date === date.iso
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <p className={`text-xs md:text-sm font-bold mb-1 ${
+                        form.preferred_date === date.iso ? 'text-blue-700' : 'text-gray-900'
+                      }`}>
+                        {index === 0 ? 'Today' : index === 1 ? 'Tomorrow' : date.dayName.slice(0, 3)}
+                      </p>
+                      <p className={`text-[10px] md:text-xs ${
+                        form.preferred_date === date.iso ? 'text-blue-600' : 'text-gray-500'
+                      }`}>
+                        {new Date(date.iso).getDate()} {new Date(date.iso).toLocaleDateString('en-IN', { month: 'short' })}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Form Fields */}
@@ -292,22 +330,6 @@ const AppointmentSection = () => {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-      `}</style>
     </section>
   );
 };
