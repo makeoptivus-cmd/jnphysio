@@ -16,7 +16,8 @@ const getAvailableDates = () => {
         month: "long",
         year: "numeric",
       }),
-      dayName: date.toLocaleDateString("en-IN", { weekday: "long" })
+      dayName: date.toLocaleDateString("en-IN", { weekday: "long" }),
+      dayOfWeek: date.getDay() // 0=Sunday, 1=Monday, etc.
     });
   }
   return dates;
@@ -25,18 +26,32 @@ const getAvailableDates = () => {
 const availableDates = getAvailableDates();
 const todayISO = availableDates[0].iso;
 
-// Time slots: 8 AM – 10 PM (15 mins)
-const generateTimeSlots = () => {
+// Generate time slots based on hospital timings
+const generateTimeSlots = (selectedDateISO) => {
   const slots = [];
   const now = new Date();
+  const selectedDate = new Date(selectedDateISO);
+  const isToday = selectedDateISO === todayISO;
+  const dayOfWeek = selectedDate.getDay(); // 0=Sunday, 1=Monday, etc.
+  const isSunday = dayOfWeek === 0;
 
-  for (let h = 8; h <= 22; h++) {
+  // Define hospital timings
+  let morningStart = 10, morningEnd = 13; // 10 AM to 1 PM
+  let eveningStart = 17, eveningEnd = 22; // 5 PM to 10 PM
+  
+  // Sunday evening ends at 8 PM
+  if (isSunday) {
+    eveningEnd = 20;
+  }
+
+  // Generate morning slots (10 AM - 1 PM)
+  for (let h = morningStart; h < morningEnd; h++) {
     for (let m of [0, 15, 30, 45]) {
-      if (h === 22 && m > 0) continue;
-
-      const t = new Date();
-      t.setHours(h, m, 0, 0);
-      if (t <= now) continue;
+      const slotTime = new Date(selectedDate);
+      slotTime.setHours(h, m, 0, 0);
+      
+      // Skip if it's today and time has passed
+      if (isToday && slotTime <= now) continue;
 
       const hour12 = h % 12 || 12;
       const ampm = h < 12 ? "AM" : "PM";
@@ -45,13 +60,34 @@ const generateTimeSlots = () => {
       slots.push({
         value: `${h.toString().padStart(2, "0")}:${min}`,
         label: `${hour12}:${min} ${ampm}`,
+        period: "Morning"
       });
     }
   }
+
+  // Generate evening slots (5 PM - 10 PM or 8 PM on Sunday)
+  for (let h = eveningStart; h < eveningEnd; h++) {
+    for (let m of [0, 15, 30, 45]) {
+      const slotTime = new Date(selectedDate);
+      slotTime.setHours(h, m, 0, 0);
+      
+      // Skip if it's today and time has passed
+      if (isToday && slotTime <= now) continue;
+
+      const hour12 = h % 12 || 12;
+      const ampm = "PM";
+      const min = m.toString().padStart(2, "0");
+
+      slots.push({
+        value: `${h.toString().padStart(2, "0")}:${min}`,
+        label: `${hour12}:${min} ${ampm}`,
+        period: "Evening"
+      });
+    }
+  }
+
   return slots;
 };
-
-const timeSlots = generateTimeSlots();
 
 const AppointmentSection = () => {
   const [form, setForm] = useState({
@@ -67,8 +103,19 @@ const AppointmentSection = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Generate time slots based on selected date
+  const timeSlots = generateTimeSlots(form.preferred_date);
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleDateChange = (newDate) => {
+    setForm({ 
+      ...form, 
+      preferred_date: newDate,
+      preferred_time: "" // Reset time when date changes
+    });
+  };
 
   const handleSubmit = async () => {
     // Validation
@@ -116,6 +163,10 @@ const AppointmentSection = () => {
     });
   };
 
+  // Group time slots by period
+  const morningSlots = timeSlots.filter(slot => slot.period === "Morning");
+  const eveningSlots = timeSlots.filter(slot => slot.period === "Evening");
+
   return (
     <section id="appointment" className="w-full bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-8 md:py-12">
       {/* RESPONSIVE CONTAINER */}
@@ -161,7 +212,7 @@ const AppointmentSection = () => {
                   <button
                     key={date.iso}
                     type="button"
-                    onClick={() => setForm({ ...form, preferred_date: date.iso })}
+                    onClick={() => handleDateChange(date.iso)}
                     className={`flex-1 p-3 md:p-4 rounded-xl border-2 transition-all ${
                       form.preferred_date === date.iso
                         ? 'border-blue-500 bg-blue-50 shadow-md'
@@ -285,19 +336,49 @@ const AppointmentSection = () => {
                 <label className="block text-sm md:text-base font-semibold text-gray-700 mb-2">
                   Preferred Time <span className="text-red-500">*</span>
                 </label>
-                <select
-                  name="preferred_time"
-                  value={form.preferred_time}
-                  onChange={handleChange}
-                  className="w-full px-4 md:px-5 py-3 md:py-4 border-2 border-gray-200 rounded-xl md:rounded-2xl text-sm md:text-base bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
-                >
-                  <option value="">Select time slot</option>
-                  {timeSlots.map((t, i) => (
-                    <option key={i} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
+                
+                {timeSlots.length === 0 ? (
+                  <div className="w-full px-4 md:px-5 py-3 md:py-4 border-2 border-yellow-200 bg-yellow-50 rounded-xl md:rounded-2xl text-sm md:text-base text-yellow-800">
+                    No available slots for today. Please select a future date.
+                  </div>
+                ) : (
+                  <select
+                    name="preferred_time"
+                    value={form.preferred_time}
+                    onChange={handleChange}
+                    className="w-full px-4 md:px-5 py-3 md:py-4 border-2 border-gray-200 rounded-xl md:rounded-2xl text-sm md:text-base bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                  >
+                    <option value="">Select time slot</option>
+                    
+                    {morningSlots.length > 0 && (
+                      <optgroup label="🌅 Morning (10:00 AM - 1:00 PM)">
+                        {morningSlots.map((t, i) => (
+                          <option key={i} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    
+                    {eveningSlots.length > 0 && (
+                      <optgroup label={`🌆 Evening (5:00 PM - ${new Date(form.preferred_date).getDay() === 0 ? '8:00' : '10:00'} PM)`}>
+                        {eveningSlots.map((t, i) => (
+                          <option key={i} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
+                )}
+
+                {/* Hospital Timings Info */}
+                <p className="text-xs md:text-sm text-gray-500 mt-2">
+                  {new Date(form.preferred_date).getDay() === 0 
+                    ? "Sunday: 10 AM - 1 PM, 5 PM - 8 PM"
+                    : "Mon-Sat: 10 AM - 1 PM, 5 PM - 10 PM"
+                  }
+                </p>
               </div>
             </div>
 

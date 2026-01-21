@@ -91,7 +91,7 @@ const Footer = () => {
             {/* Clinic Timing */}
             <div className="flex items-center gap-2 text-primary-foreground/90">
               <Clock className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm">Mon - Sat: 9:00 AM - 8:00 PM</span>
+              <span className="text-sm">Mon - Sat: 10:00 AM - 8:00 PM</span>
             </div>
 
             {/* Address */}
