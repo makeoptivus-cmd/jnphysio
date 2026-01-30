@@ -46,11 +46,12 @@ const Header = () => {
 
           {/* CENTER: Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <button onClick={() => scrollToSection("about")}>About</button>
-            <button onClick={() => scrollToSection("services")}>Services</button>
-            <button onClick={() => scrollToSection("why-us")}>Why Us</button>
-            <button onClick={() => scrollToSection("reviews")}>Reviews</button>
-          </nav>
+  <button onClick={() => scrollToSection("about")}>About</button>
+  <button onClick={() => scrollToSection("services")}>Services</button>
+  <button onClick={() => scrollToSection("why-us")}>Why Us</button>
+  <button onClick={() => scrollToSection("reviews")}>Reviews</button>
+</nav>
+
 
           {/* RIGHT: Book Appointment */}
           <div className="flex items-center gap-2">

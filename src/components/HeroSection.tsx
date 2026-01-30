@@ -91,13 +91,16 @@ const HeroSection = () => {
               <div className="flex flex-col items-center text-center space-y-4">
                 {/* Logo */}
                 <div className="w-28 h-28 md:w-32 md:h-32 rounded-full gradient-hero p-1">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-secondary">
-                    <img
-                      src="/jnp.jpg"
-                      alt="JN Physiotherapy Logo"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                 <div className="w-full h-full rounded-full overflow-hidden bg-secondary">
+  <img
+    src="/jnp.jpg"
+    alt="JN Physiotherapy Logo"
+    className="w-full h-full object-cover"
+    loading="lazy"
+    decoding="async"
+    fetchpriority="high"
+  />
+</div>
                 </div>
 
                 {/* Info */}

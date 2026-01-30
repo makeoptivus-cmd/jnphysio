@@ -32,7 +32,6 @@ const ReviewsSection = () => {
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
 
-  // Google review flow
   const [showGooglePrompt, setShowGooglePrompt] = useState(false);
   const [lastReviewText, setLastReviewText] = useState("");
 
@@ -42,20 +41,40 @@ const ReviewsSection = () => {
   useEffect(() => {
     const loadReviews = async () => {
       const { data, error } = await fetchReviews();
-
       if (error) {
         toast.error("Failed to fetch reviews");
         return;
       }
 
       if (data) {
-        const sorted = [...data].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        setReviews(
+          [...data].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
         );
-        setReviews(sorted);
       }
     };
+
     loadReviews();
+  }, []);
+
+  /* ✅ SCROLL TO REVIEWS WHEN OPENED VIA QR */
+  useEffect(() => {
+    const scrollToReviews = () => {
+      if (window.location.hash === "#reviews") {
+        const el = document.getElementById("reviews");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    };
+
+    setTimeout(scrollToReviews, 300);
+    window.addEventListener("hashchange", scrollToReviews);
+
+    return () => {
+      window.removeEventListener("hashchange", scrollToReviews);
+    };
   }, []);
 
   /* ---------------- SUBMIT REVIEW ---------------- */
@@ -75,18 +94,14 @@ const ReviewsSection = () => {
     };
 
     const result = await postReview(newReview);
-
     if (!result.success) {
       toast.error("Failed to submit review");
       return;
     }
 
     setReviews((prev) => [newReview, ...prev]);
-
-    // save for google
     setLastReviewText(comment.trim());
 
-    // reset
     setName("");
     setRating(null);
     setComment("");
@@ -94,7 +109,6 @@ const ReviewsSection = () => {
 
     toast.success("Thank you for your review!");
 
-    // show google prompt only for good ratings
     if (rating >= 4) {
       setShowGooglePrompt(true);
     }
@@ -104,20 +118,14 @@ const ReviewsSection = () => {
   const handleGoogleReview = async () => {
     try {
       await navigator.clipboard.writeText(lastReviewText);
-
-      window.open(
-        "https://g.page/r/CeuovpAx9kNzEBM/review",
-        "_blank"
-      );
-
-      toast.success("Review copied! Paste it on Google (Ctrl + V)");
+      window.open("https://g.page/r/CeuovpAx9kNzEBM/review", "_blank");
+      toast.success("Review copied! Paste it on Google");
       setShowGooglePrompt(false);
     } catch {
       toast.error("Clipboard permission denied");
     }
   };
 
-  /* ---------------- HELPERS ---------------- */
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -162,7 +170,6 @@ const ReviewsSection = () => {
     </Card>
   );
 
-  /* ---------------- UI ---------------- */
   return (
     <section id="reviews" className="py-12 bg-muted/50">
       <div className="container mx-auto px-4 space-y-6">
@@ -192,39 +199,29 @@ const ReviewsSection = () => {
               </DialogHeader>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label>Your Name</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} />
+                <Label>Your Name</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} />
+
+                <Label>Rating</Label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button key={s} type="button" onClick={() => setRating(s)}>
+                      <Star
+                        className={`w-7 h-7 ${
+                          s <= (rating ?? 0)
+                            ? "fill-accent text-accent"
+                            : "text-border"
+                        }`}
+                      />
+                    </button>
+                  ))}
                 </div>
 
-                <div>
-                  <Label>Rating</Label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setRating(s)}
-                      >
-                        <Star
-                          className={`w-7 h-7 ${
-                            s <= (rating ?? 0)
-                              ? "fill-accent text-accent"
-                              : "text-border"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Review</Label>
-                  <Textarea
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                  />
-                </div>
+                <Label>Review</Label>
+                <Textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
 
                 <Button type="submit" className="w-full">
                   Submit Review
@@ -242,8 +239,8 @@ const ReviewsSection = () => {
         </div>
 
         {scrollableReviews.length > 0 && (
-          <div>
-            <div className="flex justify-end gap-2 mb-2">
+          <>
+            <div className="flex justify-end gap-2">
               <Button size="icon" variant="outline" onClick={() => scroll("left")}>
                 <ChevronLeft />
               </Button>
@@ -252,20 +249,17 @@ const ReviewsSection = () => {
               </Button>
             </div>
 
-            <div
-              ref={scrollRef}
-              className="flex gap-4 overflow-x-auto pb-2"
-            >
+            <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-2">
               {scrollableReviews.map((r, i) => (
                 <div key={i} className="min-w-[280px]">
                   <ReviewCard review={r} />
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
 
-        {/* GOOGLE REVIEW POPUP */}
+        {/* GOOGLE REVIEW PROMPT */}
         <Dialog open={showGooglePrompt} onOpenChange={setShowGooglePrompt}>
           <DialogContent>
             <DialogHeader>
@@ -275,23 +269,9 @@ const ReviewsSection = () => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-3">
-              <div className="border p-3 rounded bg-muted text-sm">
-                {lastReviewText}
-              </div>
-
-              <Button onClick={handleGoogleReview} className="w-full">
-                Copy & Post on Google
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setShowGooglePrompt(false)}
-              >
-                Skip for now
-              </Button>
-            </div>
+            <Button onClick={handleGoogleReview} className="w-full">
+              Copy & Post on Google
+            </Button>
           </DialogContent>
         </Dialog>
 

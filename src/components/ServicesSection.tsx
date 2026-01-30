@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react"; // or use your preferred icon library
 
 const ServicesSection = () => {
   const scrollRef = useRef(null);
@@ -108,6 +109,16 @@ const ServicesSection = () => {
     }
   ];
 
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 420; // Width of card + gap
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section id="services" className="py-12 md:py-20 lg:py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,7 +137,25 @@ const ServicesSection = () => {
         </div>
 
         {/* Horizontal Scroll - Both Mobile and Desktop */}
-        <div>
+        <div className="relative">
+          {/* Left Button - Desktop Only */}
+          <button
+            onClick={() => scroll('left')}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-50 transition-all"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
+          </button>
+
+          {/* Right Button - Desktop Only */}
+          <button
+            onClick={() => scroll('right')}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-gray-50 transition-all"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700" />
+          </button>
+
           <div
             ref={scrollRef}
             className="flex gap-4 md:gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0"
@@ -149,6 +178,7 @@ const ServicesSection = () => {
                       src={service.image}
                       alt={service.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
