@@ -1,108 +1,108 @@
 import { useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // or use your preferred icon library
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ServicesSection = () => {
   const scrollRef = useRef(null);
 
   const services = [
     {
-      image: "/img1.png",
+      video: "/video1.mp4",
       title: "Knee Pain Rehabilitation",
       description: "Reduce pain, improve mobility, and restore knee strength.",
       color: "from-blue-500 to-cyan-400",
     },
     {
-      image: "/img2.png",
+      video: "/video2.mp4",
       title: "Pre- and Post-Surgical Rehabilitation",
       description: "Faster, safer recovery before and after surgery.",
       color: "from-teal-500 to-emerald-400",
     },
     {
-      image: "/img3.png",
+      video: "/video3.mp4",
       title: "Ligament Injury Rehabilitation",
       description: "Stability-focused rehab to heal and prevent re-injury.",
       color: "from-orange-500 to-amber-400",
     },
     {
-      image: "/img4.png",
+      video: "/video4.mp4",
       title: "Shoulder Pain Rehabilitation",
       description: "Relieve stiffness, pain, and restore full shoulder movement.",
       color: "from-purple-500 to-pink-400",
     },
     {
-      image: "/img5.png",
+      video: "/video5.mp4",
       title: "Neck Pain Rehabilitation",
       description: "Targeted care to ease pain and improve posture.",
       color: "from-indigo-500 to-blue-400",
     },
     {
-      image: "/img6.png",
+      video: "/video6.mp4",
       title: "Sports Injury and Rehabilitation",
       description: "Performance-driven recovery to get you back in action.",
       color: "from-red-500 to-orange-400",
     },
     {
-      image: "/img7.png",
+      video: "/video7.mp4",
       title: "Orthopaedic Rehabilitation",
       description: "Comprehensive care for bones, joints, and muscles.",
       color: "from-green-500 to-teal-400",
     },
     {
-      image: "/img8.png",
+      video: "/video8.mp4",
       title: "Neurological Rehabilitation",
       description: "Improving movement, balance, and daily function.",
       color: "from-violet-500 to-purple-400",
     },
     {
-      image: "/img9.png",
+      video: "/video9.mp4",
       title: "Cardio Wellness",
       description: "Safe exercise programs to improve heart health and stamina",
       color: "from-rose-500 to-pink-400",
     },
     {
-      image: "/img10.png",
+      video: "/video10.mp4",
       title: "Interferential Therapy (IFT)",
       description: "Deep pain relief using targeted electrical currents.",
       color: "from-cyan-500 to-blue-400",
     },
     {
-      image: "/img11.png",
+      video: "/video11.mp4",
       title: "Transcutaneous Electrical Nerve Stimulation (TENS)",
       description: "Non-invasive pain control through nerve stimulation.",
       color: "from-amber-500 to-yellow-400",
     },
     {
-      image: "/img12.png",
+      video: "/video12.mp4",
       title: "Wax Therapy",
       description: "Heat therapy to reduce stiffness and joint pain.",
       color: "from-orange-500 to-red-400",
     },
     {
-      image: "/img13.png",
+      video: "/video13.mp4",
       title: "Ultrasound Therapy (UST)",
       description: "Deep tissue healing using therapeutic sound waves.",
       color: "from-teal-500 to-cyan-400",
     },
     {
-      image: "/img14.png",
+      video: "/video14.mp4",
       title: "Electrical Muscle Stimulation (EMS)",
       description: "Strengthening weak muscles through electrical activation.",
       color: "from-blue-500 to-indigo-400",
     },
     {
-      image: "/img15.png",
+      video: "/video15.mp4",
       title: "Advanced Laser Therapy",
       description: "Fast pain relief and tissue healing with laser technology.",
       color: "from-purple-500 to-violet-400",
     },
     {
-      image: "/img16.png",
+      video: "/video16.mp4",
       title: "Manual Therapy",
       description: "Hands-on techniques to reduce pain and improve mobility.",
       color: "from-emerald-500 to-green-400",
     },
     {
-      image: "/img17.png",
+      video: "/video17.mp4",
       title: "Geriatric Care Physiotherapy",
       description: "Therapeutic treatment for joint stiffness",
       color: "from-pink-500 to-rose-400",
@@ -111,7 +111,7 @@ const ServicesSection = () => {
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 420; // Width of card + gap
+      const scrollAmount = 420;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -122,7 +122,7 @@ const ServicesSection = () => {
   return (
     <section id="services" className="py-12 md:py-20 lg:py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Heading */}
         <div className="text-center max-w-3xl mx-auto mb-10 md:mb-16">
           <span className="inline-block text-blue-600 font-semibold text-xs md:text-sm uppercase tracking-wider mb-3 md:mb-4">
@@ -171,14 +171,17 @@ const ServicesSection = () => {
                 className="flex-shrink-0 w-[280px] md:w-[360px] lg:w-[400px] snap-start"
               >
                 <div className="bg-white rounded-2xl shadow-md overflow-hidden h-full hover:shadow-xl hover:scale-[1.02] transition-all duration-300">
-                  
-                  {/* Image */}
+
+                  {/* Video */}
                   <div className={`h-48 md:h-56 lg:h-64 bg-gradient-to-br ${service.color} relative overflow-hidden`}>
-                    <img
-                      src={service.image}
-                      alt={service.title}
+                    <video
+                      src={service.video}
                       className="w-full h-full object-cover"
-                      loading="lazy"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
