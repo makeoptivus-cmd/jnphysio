@@ -181,7 +181,7 @@ const ServicesSection = () => {
                       loop
                       muted
                       playsInline
-                      preload="metadata"
+                      preload="none"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
