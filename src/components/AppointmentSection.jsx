@@ -41,7 +41,8 @@ const generateTimeSlots = (selectedDateISO) => {
   
   // Sunday evening ends at 8 PM
   if (isSunday) {
-    eveningEnd = 20;
+      eveningStart = null;
+  eveningEnd = null;
   }
 
   // Generate morning slots (10 AM - 1 PM)
@@ -65,24 +66,24 @@ const generateTimeSlots = (selectedDateISO) => {
     }
   }
 
-  // Generate evening slots (5 PM - 10 PM or 8 PM on Sunday)
-  for (let h = eveningStart; h < eveningEnd; h++) {
-    for (let m of [0, 15, 30, 45]) {
-      const slotTime = new Date(selectedDate);
-      slotTime.setHours(h, m, 0, 0);
-      
-      // Skip if it's today and time has passed
-      if (isToday && slotTime <= now) continue;
+   // Evening slots (Mon–Sat only)
+  if (eveningStart !== null) {
+    for (let h = eveningStart; h < eveningEnd; h++) {
+      for (let m of [0, 15, 30, 45]) {
+        const slotTime = new Date(selectedDate);
+        slotTime.setHours(h, m, 0, 0);
 
-      const hour12 = h % 12 || 12;
-      const ampm = "PM";
-      const min = m.toString().padStart(2, "0");
+        if (isToday && slotTime <= now) continue;
 
-      slots.push({
-        value: `${h.toString().padStart(2, "0")}:${min}`,
-        label: `${hour12}:${min} ${ampm}`,
-        period: "Evening"
-      });
+        const hour12 = h % 12 || 12;
+        const min = m.toString().padStart(2, "0");
+
+        slots.push({
+          value: `${h.toString().padStart(2, "0")}:${min}`,
+          label: `${hour12}:${min} PM`,
+          period: "Evening",
+        });
+      }
     }
   }
 
@@ -375,7 +376,7 @@ const AppointmentSection = () => {
                 {/* Hospital Timings Info */}
                 <p className="text-xs md:text-sm text-gray-500 mt-2">
                   {new Date(form.preferred_date).getDay() === 0 
-                    ? "Sunday: 10 AM - 1 PM, 5 PM - 8 PM"
+                    ? "Sunday: 10 AM - 1 PM"
                     : "Mon-Sat: 10 AM - 1 PM, 5 PM - 10 PM"
                   }
                 </p>

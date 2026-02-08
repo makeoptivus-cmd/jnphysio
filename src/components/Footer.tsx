@@ -88,11 +88,15 @@ const Footer = () => {
               <span className="text-sm">+91 8525860099</span>
             </a>
 
-            {/* Clinic Timing */}
-            <div className="flex items-center gap-2 text-primary-foreground/90">
-              <Clock className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm">Mon - Sat: 10:00 AM - 8:00 PM</span>
-            </div>
+           {/* Clinic Timing */}
+<div className="flex items-center gap-2 text-primary-foreground/90">
+  <Clock className="w-4 h-4 flex-shrink-0" />
+  <span className="text-sm">
+    Mon – Sat: 10:00 AM – 1:00 PM | 5:30 PM – 9:30 PM <br />
+    Sun: 10:00 AM – 1:00 PM
+  </span>
+</div>
+
 
             {/* Address */}
             <div className="flex items-start gap-2 text-primary-foreground/90">
